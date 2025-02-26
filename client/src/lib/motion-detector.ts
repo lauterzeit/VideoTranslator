@@ -1,5 +1,29 @@
 let prevImageData: ImageData | null = null;
 
+class MotionSmoother {
+  private smoothedX: number = 0;
+  private smoothedY: number = 0;
+  private readonly smoothingFactor: number = 0.3; // Adjust for more/less smoothing
+
+  smooth(dx: number, dy: number): { dx: number; dy: number } {
+    // Exponential moving average for smooth motion
+    this.smoothedX = this.smoothedX * (1 - this.smoothingFactor) + dx * this.smoothingFactor;
+    this.smoothedY = this.smoothedY * (1 - this.smoothingFactor) + dy * this.smoothingFactor;
+
+    return {
+      dx: this.smoothedX,
+      dy: this.smoothedY
+    };
+  }
+
+  reset() {
+    this.smoothedX = 0;
+    this.smoothedY = 0;
+  }
+}
+
+const motionSmoother = new MotionSmoother();
+
 export function detectMotion(
   video: HTMLVideoElement,
   canvas: HTMLCanvasElement,
@@ -50,11 +74,16 @@ export function detectMotion(
   prevImageData = currentFrame;
 
   if (motionPoints > 10) {  // Require minimum motion points to avoid noise
-    return {
+    const rawMotion = {
       dx: (motionX / motionPoints) / (canvas.width / 2),  // Normalize to [-1, 1]
       dy: (motionY / motionPoints) / (canvas.height / 2)  // Normalize to [-1, 1]
     };
+
+    // Apply smoothing to the motion values
+    return motionSmoother.smooth(rawMotion.dx, rawMotion.dy);
   }
 
+  // Reset smoother when no motion is detected
+  motionSmoother.reset();
   return { dx: 0, dy: 0 };
 }

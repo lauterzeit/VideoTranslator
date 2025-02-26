@@ -1,4 +1,6 @@
 let videoElement: HTMLVideoElement | null = null;
+let currentSeekTime = 0;
+let isTransitioning = false;
 
 export function setVideoElement(element: HTMLVideoElement) {
   videoElement = element;
