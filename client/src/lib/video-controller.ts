@@ -1,16 +1,11 @@
 let videoElement: HTMLVideoElement | null = null;
 let currentSeekTime = 0;
-let isTransitioning = false;
 
 export function setVideoElement(element: HTMLVideoElement) {
   videoElement = element;
   // Ensure video starts unmuted
   videoElement.muted = false;
   videoElement.volume = 0.5; // Start at 50% volume
-}
-
-function easeInOutCubic(t: number): number {
-  return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
 }
 
 export function controlVideo(motion: { dx: number; dy: number }) {
@@ -26,20 +21,12 @@ export function controlVideo(motion: { dx: number; dy: number }) {
       const seekDelta = motion.dx * SEEK_FACTOR;
       const targetTime = videoElement.currentTime + seekDelta;
 
-      // Apply easing to the seek time transition
-      if (!isTransitioning) {
-        currentSeekTime = videoElement.currentTime;
-        isTransitioning = true;
-      }
-
-      // Smoothly interpolate between current and target time
-      const easedTime = currentSeekTime + (targetTime - currentSeekTime) * easeInOutCubic(0.5);
-      const safeTime = Math.max(0.1, Math.min(easedTime, videoElement.duration - 0.1));
+      // Ensure we stay within video bounds with a small buffer
+      const safeTime = Math.max(0.1, Math.min(targetTime, videoElement.duration - 0.1));
 
       // Only update if the time actually changed
       if (safeTime !== videoElement.currentTime) {
         videoElement.currentTime = safeTime;
-        currentSeekTime = safeTime;
       }
 
       // Only try to play if we're not at the end
@@ -54,9 +41,6 @@ export function controlVideo(motion: { dx: number; dy: number }) {
       console.error('Error controlling video:', err);
     }
   } else {
-    // Reset transition state when no motion
-    isTransitioning = false;
-
     // Pause when no horizontal motion
     if (!videoElement.paused) {
       videoElement.pause();

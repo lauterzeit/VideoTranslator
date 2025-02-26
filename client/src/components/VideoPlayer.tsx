@@ -1,4 +1,4 @@
-import { useRef, useEffect, useState } from "react";
+import { useRef, useEffect, useState, forwardRef } from "react";
 import { Card } from "@/components/ui/card";
 import { setVideoElement } from "@/lib/video-controller";
 import RotatingArrow from "./RotatingArrow";
@@ -7,10 +7,13 @@ interface VideoPlayerProps {
   src: string;
 }
 
-export default function VideoPlayer({ src }: VideoPlayerProps) {
-  const videoRef = useRef<HTMLVideoElement>(null);
+const VideoPlayer = forwardRef<HTMLVideoElement, VideoPlayerProps>(({ src }, ref) => {
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
+  const localVideoRef = useRef<HTMLVideoElement>(null);
+
+  // Use the forwarded ref if provided, otherwise use local ref
+  const videoRef = (ref as React.RefObject<HTMLVideoElement>) || localVideoRef;
 
   useEffect(() => {
     if (videoRef.current) {
@@ -31,7 +34,13 @@ export default function VideoPlayer({ src }: VideoPlayerProps) {
       };
 
       const handleError = (e: Event) => {
-        console.error('Video playback error:', e);
+        const videoElement = e.target as HTMLVideoElement;
+        console.error('Video playback error:', {
+          error: videoElement.error?.message,
+          code: videoElement.error?.code,
+          networkState: videoElement.networkState,
+          readyState: videoElement.readyState
+        });
       };
 
       const handleEnded = () => {
@@ -54,7 +63,7 @@ export default function VideoPlayer({ src }: VideoPlayerProps) {
         }
       };
     }
-  }, []);
+  }, [videoRef]);
 
   return (
     <div className="relative">
@@ -67,4 +76,8 @@ export default function VideoPlayer({ src }: VideoPlayerProps) {
       <RotatingArrow videoTime={currentTime} duration={duration} />
     </div>
   );
-}
+});
+
+VideoPlayer.displayName = "VideoPlayer";
+
+export default VideoPlayer;

@@ -7,7 +7,7 @@ interface RotatingArrowProps {
 
 export default function RotatingArrow({ videoTime, duration }: RotatingArrowProps) {
   const rotation = (videoTime / duration) * 360;
-  
+
   return (
     <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
       <div className="relative w-64 h-64 bg-black/50 rounded-full">
