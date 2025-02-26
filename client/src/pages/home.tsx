@@ -38,7 +38,7 @@ export default function Home() {
             <CardContent className="p-6">
               <h2 className="text-2xl font-semibold mb-4">Video Player</h2>
               <VideoPlayer 
-                src="https://test-videos.co.uk/vids/bigbuckbunny/mp4/h264/720/Big_Buck_Bunny_720_10s_1MB.mp4"
+                src="https://www.w3schools.com/html/mov_bbb.mp4"
               />
             </CardContent>
           </Card>
