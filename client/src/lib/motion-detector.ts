@@ -3,22 +3,52 @@ let prevImageData: ImageData | null = null;
 class MotionSmoother {
   private smoothedX: number = 0;
   private smoothedY: number = 0;
-  private readonly smoothingFactor: number = 0.3; // Adjust for more/less smoothing
+  private readonly smoothingFactor: number = 0.1; // Further reduced for smoother transitions
+  private readonly velocityDamping: number = 0.85; // Damping factor for motion
+  private readonly velocityThreshold: number = 0.05; // Minimum velocity threshold
+  private prevDx: number = 0;
+  private prevDy: number = 0;
+  private velocityX: number = 0;
+  private velocityY: number = 0;
 
   smooth(dx: number, dy: number): { dx: number; dy: number } {
-    // Exponential moving average for smooth motion
-    this.smoothedX = this.smoothedX * (1 - this.smoothingFactor) + dx * this.smoothingFactor;
-    this.smoothedY = this.smoothedY * (1 - this.smoothingFactor) + dy * this.smoothingFactor;
+    // Update velocity with new motion values
+    this.velocityX = this.velocityX * this.velocityDamping + (dx - this.prevDx);
+    this.velocityY = this.velocityY * this.velocityDamping + (dy - this.prevDy);
+
+    // Apply velocity damping to previous values
+    this.prevDx = this.prevDx * this.velocityDamping;
+    this.prevDy = this.prevDy * this.velocityDamping;
+
+    // Blend new motion with damped previous motion and predicted velocity
+    const blendedDx = (dx + this.prevDx + this.velocityX) / 3;
+    const blendedDy = (dy + this.prevDy + this.velocityY) / 3;
+
+    // Apply exponential smoothing with reduced factor
+    this.smoothedX = this.smoothedX * (1 - this.smoothingFactor) + blendedDx * this.smoothingFactor;
+    this.smoothedY = this.smoothedY * (1 - this.smoothingFactor) + blendedDy * this.smoothingFactor;
+
+    // Apply velocity threshold to reduce micro-movements
+    const finalDx = Math.abs(this.smoothedX) < this.velocityThreshold ? 0 : this.smoothedX;
+    const finalDy = Math.abs(this.smoothedY) < this.velocityThreshold ? 0 : this.smoothedY;
+
+    // Update previous values
+    this.prevDx = dx;
+    this.prevDy = dy;
 
     return {
-      dx: this.smoothedX,
-      dy: this.smoothedY
+      dx: finalDx,
+      dy: finalDy
     };
   }
 
   reset() {
     this.smoothedX = 0;
     this.smoothedY = 0;
+    this.prevDx = 0;
+    this.prevDy = 0;
+    this.velocityX = 0;
+    this.velocityY = 0;
   }
 }
 
@@ -48,9 +78,12 @@ export function detectMotion(
   // Adjust sensitivity threshold (lower value = more sensitive)
   const threshold = (100 - sensitivity) * 0.5;
 
+  // Sample fewer pixels for better performance and reduced noise
+  const sampleStep = 8; // Increased step size for sampling
+
   // Compare pixels between frames
-  for (let y = 0; y < canvas.height; y += 4) {
-    for (let x = 0; x < canvas.width; x += 4) {
+  for (let y = 0; y < canvas.height; y += sampleStep) {
+    for (let x = 0; x < canvas.width; x += sampleStep) {
       const i = (y * canvas.width + x) * 4;
 
       // Calculate difference for each color channel
@@ -58,7 +91,8 @@ export function detectMotion(
       const gdiff = Math.abs(currentFrame.data[i + 1] - prevImageData.data[i + 1]);
       const bdiff = Math.abs(currentFrame.data[i + 2] - prevImageData.data[i + 2]);
 
-      if ((rdiff + gdiff + bdiff) / 3 > threshold) {
+      const avgDiff = (rdiff + gdiff + bdiff) / 3;
+      if (avgDiff > threshold) {
         // Calculate relative position from center
         const relativeX = x - canvas.width / 2;
         const relativeY = y - canvas.height / 2;
@@ -73,17 +107,16 @@ export function detectMotion(
   // Store current frame as previous for next comparison
   prevImageData = currentFrame;
 
-  if (motionPoints > 10) {  // Require minimum motion points to avoid noise
+  if (motionPoints > 5) {  // Keep minimum motion points requirement low
     const rawMotion = {
       dx: (motionX / motionPoints) / (canvas.width / 2),  // Normalize to [-1, 1]
       dy: (motionY / motionPoints) / (canvas.height / 2)  // Normalize to [-1, 1]
     };
 
-    // Apply smoothing to the motion values
+    // Apply enhanced smoothing to the motion values
     return motionSmoother.smooth(rawMotion.dx, rawMotion.dy);
   }
 
-  // Reset smoother when no motion is detected
-  motionSmoother.reset();
-  return { dx: 0, dy: 0 };
+  // Apply smoothing even when no motion is detected for smoother transitions
+  return motionSmoother.smooth(0, 0);
 }
