@@ -1,46 +1,23 @@
-import { useRef, useEffect, useState, forwardRef } from "react";
+import { useRef, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { setVideoElement } from "@/lib/video-controller";
-import RotatingArrow from "./RotatingArrow";
 
 interface VideoPlayerProps {
   src: string;
 }
 
-const VideoPlayer = forwardRef<HTMLVideoElement, VideoPlayerProps>(({ src }, ref) => {
-  const [currentTime, setCurrentTime] = useState(0);
-  const [duration, setDuration] = useState(0);
-  const localVideoRef = useRef<HTMLVideoElement>(null);
-
-  // Use the forwarded ref if provided, otherwise use local ref
-  const videoRef = (ref as React.RefObject<HTMLVideoElement>) || localVideoRef;
+export default function VideoPlayer({ src }: VideoPlayerProps) {
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
     if (videoRef.current) {
-      videoRef.current.muted = false;
-      videoRef.current.volume = 0.5;
+      videoRef.current.muted = false; // Ensure video is unmuted
+      videoRef.current.volume = 0.5; // Set initial volume to 50%
       setVideoElement(videoRef.current);
 
-      const handleTimeUpdate = () => {
-        if (videoRef.current) {
-          setCurrentTime(videoRef.current.currentTime);
-        }
-      };
-
-      const handleDurationChange = () => {
-        if (videoRef.current) {
-          setDuration(videoRef.current.duration);
-        }
-      };
-
+      // Add error handling for video events
       const handleError = (e: Event) => {
-        const videoElement = e.target as HTMLVideoElement;
-        console.error('Video playback error:', {
-          error: videoElement.error?.message,
-          code: videoElement.error?.code,
-          networkState: videoElement.networkState,
-          readyState: videoElement.readyState
-        });
+        console.error('Video playback error:', e);
       };
 
       const handleEnded = () => {
@@ -49,35 +26,26 @@ const VideoPlayer = forwardRef<HTMLVideoElement, VideoPlayerProps>(({ src }, ref
         }
       };
 
-      videoRef.current.addEventListener('timeupdate', handleTimeUpdate);
-      videoRef.current.addEventListener('durationchange', handleDurationChange);
       videoRef.current.addEventListener('error', handleError);
       videoRef.current.addEventListener('ended', handleEnded);
 
       return () => {
         if (videoRef.current) {
-          videoRef.current.removeEventListener('timeupdate', handleTimeUpdate);
-          videoRef.current.removeEventListener('durationchange', handleDurationChange);
           videoRef.current.removeEventListener('error', handleError);
           videoRef.current.removeEventListener('ended', handleEnded);
         }
       };
     }
-  }, [videoRef]);
+  }, []);
 
   return (
-    <div className="relative">
+    <Card className="overflow-hidden">
       <video
         ref={videoRef}
         src={src}
         controls
         className="w-full rounded-lg"
       />
-      <RotatingArrow videoTime={currentTime} duration={duration} />
-    </div>
+    </Card>
   );
-});
-
-VideoPlayer.displayName = "VideoPlayer";
-
-export default VideoPlayer;
+}

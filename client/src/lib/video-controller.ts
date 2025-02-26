@@ -1,5 +1,6 @@
 let videoElement: HTMLVideoElement | null = null;
 let currentSeekTime = 0;
+let isTransitioning = false;
 
 export function setVideoElement(element: HTMLVideoElement) {
   videoElement = element;
@@ -13,20 +14,21 @@ export function controlVideo(motion: { dx: number; dy: number }) {
 
   const MOTION_THRESHOLD = 0.1;
   const SEEK_FACTOR = 5; // Seconds to seek per motion unit
+  const VOLUME_FACTOR = 0.8; // Increased for more noticeable volume changes
 
   // Horizontal motion controls playhead position
   if (Math.abs(motion.dx) > MOTION_THRESHOLD) {
     try {
-      // Calculate target seek time based on motion intensity
-      const seekDelta = motion.dx * SEEK_FACTOR;
-      const targetTime = videoElement.currentTime + seekDelta;
+      // Calculate seek time based on motion intensity
+      const seekTime = motion.dx * SEEK_FACTOR;
+      const newTime = videoElement.currentTime + seekTime;
 
       // Ensure we stay within video bounds with a small buffer
-      const safeTime = Math.max(0.1, Math.min(targetTime, videoElement.duration - 0.1));
+      const safeNewTime = Math.max(0.1, Math.min(newTime, videoElement.duration - 0.1));
 
       // Only update if the time actually changed
-      if (safeTime !== videoElement.currentTime) {
-        videoElement.currentTime = safeTime;
+      if (safeNewTime !== videoElement.currentTime) {
+        videoElement.currentTime = safeNewTime;
       }
 
       // Only try to play if we're not at the end
@@ -50,7 +52,7 @@ export function controlVideo(motion: { dx: number; dy: number }) {
   // Vertical motion controls volume
   if (Math.abs(motion.dy) > MOTION_THRESHOLD) {
     // Current volume + scaled motion (inverted so up increases volume)
-    const newVolume = videoElement.volume - (motion.dy * 0.8);
+    const newVolume = videoElement.volume - (motion.dy * VOLUME_FACTOR);
     videoElement.volume = Math.max(0, Math.min(1, newVolume));
     console.log('Volume set to:', videoElement.volume); // Debug volume changes
   }

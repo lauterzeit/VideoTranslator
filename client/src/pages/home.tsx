@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import CameraFeed from "@/components/CameraFeed";
@@ -10,7 +10,6 @@ export default function Home() {
   const { toast } = useToast();
   const [sensitivity, setSensitivity] = useState(30);
   const [isEnabled, setIsEnabled] = useState(true);
-  const videoRef = useRef<HTMLVideoElement>(null);
 
   const handleError = (error: string) => {
     toast({
@@ -39,8 +38,7 @@ export default function Home() {
             <CardContent className="p-6">
               <h2 className="text-2xl font-semibold mb-4">Video Player</h2>
               <VideoPlayer 
-                ref={videoRef}
-                src="https://storage.googleapis.com/web-dev-assets/video/chrome.webm"
+                src="https://test-videos.co.uk/vids/bigbuckbunny/mp4/h264/720/Big_Buck_Bunny_720_10s_1MB.mp4"
               />
             </CardContent>
           </Card>
