@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import CameraFeed from "@/components/CameraFeed";
@@ -10,6 +10,7 @@ export default function Home() {
   const { toast } = useToast();
   const [sensitivity, setSensitivity] = useState(30);
   const [isEnabled, setIsEnabled] = useState(true);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   const handleError = (error: string) => {
     toast({
@@ -38,8 +39,26 @@ export default function Home() {
             <CardContent className="p-6">
               <h2 className="text-2xl font-semibold mb-4">Video Player</h2>
               <VideoPlayer 
-                src="https://www.w3schools.com/html/mov_bbb.mp4"
+                src="https://storage.googleapis.com/webfundamentals-assets/videos/chrome.mp4"
+                ref={videoRef}
               />
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                <svg 
+                  className="w-32 h-32 transform rotate-0"
+                  style={{
+                    transform: `rotate(${(videoRef?.current?.currentTime || 0) * 360}deg)`,
+                    transition: 'transform 0.1s linear'
+                  }}
+                  viewBox="0 0 24 24"
+                >
+                  <path 
+                    fill="white" 
+                    stroke="black"
+                    strokeWidth="1"
+                    d="M12 2L19 9H15V22H9V9H5L12 2Z"
+                  />
+                </svg>
+              </div>
             </CardContent>
           </Card>
         </div>
