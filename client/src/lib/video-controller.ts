@@ -16,15 +16,29 @@ export function controlVideo(motion: { dx: number; dy: number }) {
 
   // Horizontal motion controls playhead position
   if (Math.abs(motion.dx) > MOTION_THRESHOLD) {
-    // Calculate seek time based on motion intensity
-    const seekTime = motion.dx * SEEK_FACTOR;
-    const newTime = videoElement.currentTime + seekTime;
+    try {
+      // Calculate seek time based on motion intensity
+      const seekTime = motion.dx * SEEK_FACTOR;
+      const newTime = videoElement.currentTime + seekTime;
 
-    // Ensure we stay within video bounds
-    videoElement.currentTime = Math.max(0, Math.min(newTime, videoElement.duration));
+      // Ensure we stay within video bounds with a small buffer
+      const safeNewTime = Math.max(0.1, Math.min(newTime, videoElement.duration - 0.1));
 
-    if (videoElement.paused) {
-      videoElement.play().catch(err => console.error('Error playing video:', err));
+      // Only update if the time actually changed
+      if (safeNewTime !== videoElement.currentTime) {
+        videoElement.currentTime = safeNewTime;
+      }
+
+      // Only try to play if we're not at the end
+      if (videoElement.currentTime < videoElement.duration - 0.1) {
+        if (videoElement.paused) {
+          videoElement.play().catch(err => console.error('Error playing video:', err));
+        }
+      } else {
+        videoElement.pause(); // Pause at the end
+      }
+    } catch (err) {
+      console.error('Error controlling video:', err);
     }
   } else {
     // Pause when no horizontal motion
