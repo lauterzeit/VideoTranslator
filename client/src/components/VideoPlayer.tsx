@@ -11,6 +11,8 @@ export default function VideoPlayer({ src }: VideoPlayerProps) {
 
   useEffect(() => {
     if (videoRef.current) {
+      videoRef.current.muted = false; // Ensure video is unmuted
+      videoRef.current.volume = 0.5; // Set initial volume to 50%
       setVideoElement(videoRef.current);
     }
   }, []);
