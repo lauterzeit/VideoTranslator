@@ -9,26 +9,37 @@ export function setVideoElement(element: HTMLVideoElement) {
   videoElement.volume = 0.5; // Start at 50% volume
 }
 
+function easeInOutCubic(t: number): number {
+  return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+}
+
 export function controlVideo(motion: { dx: number; dy: number }) {
   if (!videoElement) return;
 
   const MOTION_THRESHOLD = 0.1;
   const SEEK_FACTOR = 5; // Seconds to seek per motion unit
-  const VOLUME_FACTOR = 0.8; // Increased for more noticeable volume changes
 
   // Horizontal motion controls playhead position
   if (Math.abs(motion.dx) > MOTION_THRESHOLD) {
     try {
-      // Calculate seek time based on motion intensity
-      const seekTime = motion.dx * SEEK_FACTOR;
-      const newTime = videoElement.currentTime + seekTime;
+      // Calculate target seek time based on motion intensity
+      const seekDelta = motion.dx * SEEK_FACTOR;
+      const targetTime = videoElement.currentTime + seekDelta;
 
-      // Ensure we stay within video bounds with a small buffer
-      const safeNewTime = Math.max(0.1, Math.min(newTime, videoElement.duration - 0.1));
+      // Apply easing to the seek time transition
+      if (!isTransitioning) {
+        currentSeekTime = videoElement.currentTime;
+        isTransitioning = true;
+      }
+
+      // Smoothly interpolate between current and target time
+      const easedTime = currentSeekTime + (targetTime - currentSeekTime) * easeInOutCubic(0.5);
+      const safeTime = Math.max(0.1, Math.min(easedTime, videoElement.duration - 0.1));
 
       // Only update if the time actually changed
-      if (safeNewTime !== videoElement.currentTime) {
-        videoElement.currentTime = safeNewTime;
+      if (safeTime !== videoElement.currentTime) {
+        videoElement.currentTime = safeTime;
+        currentSeekTime = safeTime;
       }
 
       // Only try to play if we're not at the end
@@ -43,6 +54,9 @@ export function controlVideo(motion: { dx: number; dy: number }) {
       console.error('Error controlling video:', err);
     }
   } else {
+    // Reset transition state when no motion
+    isTransitioning = false;
+
     // Pause when no horizontal motion
     if (!videoElement.paused) {
       videoElement.pause();
@@ -52,7 +66,7 @@ export function controlVideo(motion: { dx: number; dy: number }) {
   // Vertical motion controls volume
   if (Math.abs(motion.dy) > MOTION_THRESHOLD) {
     // Current volume + scaled motion (inverted so up increases volume)
-    const newVolume = videoElement.volume - (motion.dy * VOLUME_FACTOR);
+    const newVolume = videoElement.volume - (motion.dy * 0.8);
     videoElement.volume = Math.max(0, Math.min(1, newVolume));
     console.log('Volume set to:', videoElement.volume); // Debug volume changes
   }
