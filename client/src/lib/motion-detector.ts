@@ -139,8 +139,8 @@ export function detectMotion(
     return motionSmoother.smooth(rawMotion.dx, rawMotion.dy);
   }
 
-  // Check for inactivity (3 seconds)
-  if (!resetTimeout && Date.now() - lastMotionTime > 3000) {
+  // Check for inactivity (10 seconds)
+  if (!resetTimeout && Date.now() - lastMotionTime > 10000) {
     resetTimeout = setTimeout(() => {
       resetToMidpoint();
       resetTimeout = null;
