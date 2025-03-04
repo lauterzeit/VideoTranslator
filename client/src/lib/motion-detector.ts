@@ -3,9 +3,9 @@ let prevImageData: ImageData | null = null;
 class MotionSmoother {
   private smoothedX: number = 0;
   private smoothedY: number = 0;
-  private readonly smoothingFactor: number = 0.1; // Further reduced for smoother transitions
-  private readonly velocityDamping: number = 0.85; // Damping factor for motion
-  private readonly velocityThreshold: number = 0.05; // Minimum velocity threshold
+  private readonly smoothingFactor: number = 0.075; // Further reduced for smoother transitions, default 0.1
+  private readonly velocityDamping: number = 0.9; // Damping factor for motion, default 0.85
+  private readonly velocityThreshold: number = 0.05; // Minimum velocity threshold, default 0.05
   private prevDx: number = 0;
   private prevDy: number = 0;
   private velocityX: number = 0;
@@ -79,7 +79,7 @@ export function detectMotion(
   const threshold = (100 - sensitivity) * 0.5;
 
   // Sample fewer pixels for better performance and reduced noise
-  const sampleStep = 8; // Increased step size for sampling
+  const sampleStep = 4; // Increased step size for sampling, default 8
 
   // Compare pixels between frames
   for (let y = 0; y < canvas.height; y += sampleStep) {
