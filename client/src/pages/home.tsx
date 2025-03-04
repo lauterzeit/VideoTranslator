@@ -10,7 +10,7 @@ export default function Home() {
   const { toast } = useToast();
   const [sensitivity, setSensitivity] = useState(60);
   const [isEnabled, setIsEnabled] = useState(true);
-  const [showCamera, setShowCamera] = useState(true);
+  const [showCamera, setShowCamera] = useState(false); // Set initial state to false
 
   const handleError = (error: string) => {
     toast({
