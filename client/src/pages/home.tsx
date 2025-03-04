@@ -51,10 +51,10 @@ export default function Home() {
         <Separator className="my-8" />
 
         <ConfigPanel 
-          sensitivity={sensitivity}
-          onSensitivityChange={setSensitivity}
           isEnabled={isEnabled}
           onEnabledChange={setIsEnabled}
+          sensitivity={sensitivity}
+          onSensitivityChange={setSensitivity}
           showCamera={showCamera}
           onShowCameraChange={setShowCamera}
         />

@@ -13,10 +13,10 @@ interface ConfigPanelProps {
 }
 
 export default function ConfigPanel({
-  sensitivity,
-  onSensitivityChange,
   isEnabled,
   onEnabledChange,
+  sensitivity,
+  onSensitivityChange,
   showCamera,
   onShowCameraChange
 }: ConfigPanelProps) {
@@ -27,17 +27,6 @@ export default function ConfigPanel({
 
         <div className="space-y-6">
           <div className="flex items-center justify-between">
-            <Label htmlFor="motion-detection" className="text-lg">
-              Motion Detection
-            </Label>
-            <Switch
-              id="motion-detection"
-              checked={isEnabled}
-              onCheckedChange={onEnabledChange}
-            />
-          </div>
-
-          <div className="flex items-center justify-between">
             <Label htmlFor="show-camera" className="text-lg">
               Show Camera Feed
             </Label>
@@ -47,7 +36,18 @@ export default function ConfigPanel({
               onCheckedChange={onShowCameraChange}
             />
           </div>
-
+          
+          <div className="flex items-center justify-between">
+            <Label htmlFor="motion-detection" className="text-lg">
+              Motion Detection
+            </Label>
+            <Switch
+              id="motion-detection"
+              checked={isEnabled}
+              onCheckedChange={onEnabledChange}
+            />
+          </div>
+        
           <div className="space-y-2">
             <Label htmlFor="sensitivity" className="text-lg">
               Motion Sensitivity: {sensitivity}%
