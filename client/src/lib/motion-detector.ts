@@ -1,4 +1,6 @@
 let prevImageData: ImageData | null = null;
+let lastMotionTime: number = Date.now();
+let resetTimeout: NodeJS.Timeout | null = null;
 
 class MotionSmoother {
   private smoothedX: number = 0;
@@ -54,6 +56,19 @@ class MotionSmoother {
 
 const motionSmoother = new MotionSmoother();
 
+// Function to reset video to midpoint
+function resetToMidpoint() {
+  const videoElements = document.getElementsByTagName('video');
+  // Find the video player (not the camera feed)
+  for (const video of videoElements) {
+    if (!video.srcObject) { // This is the video player, not the camera feed
+      const midPoint = video.duration / 2;
+      video.currentTime = midPoint;
+      break;
+    }
+  }
+}
+
 export function detectMotion(
   video: HTMLVideoElement,
   canvas: HTMLCanvasElement,
@@ -108,6 +123,13 @@ export function detectMotion(
   prevImageData = currentFrame;
 
   if (motionPoints > 5) {  // Keep minimum motion points requirement low
+    // Reset the inactivity timer when motion is detected
+    lastMotionTime = Date.now();
+    if (resetTimeout) {
+      clearTimeout(resetTimeout);
+      resetTimeout = null;
+    }
+
     const rawMotion = {
       dx: (motionX / motionPoints) / (canvas.width / 2),  // Normalize to [-1, 1]
       dy: (motionY / motionPoints) / (canvas.height / 2)  // Normalize to [-1, 1]
@@ -115,6 +137,14 @@ export function detectMotion(
 
     // Apply enhanced smoothing to the motion values
     return motionSmoother.smooth(rawMotion.dx, rawMotion.dy);
+  }
+
+  // Check for inactivity (3 seconds)
+  if (!resetTimeout && Date.now() - lastMotionTime > 3000) {
+    resetTimeout = setTimeout(() => {
+      resetToMidpoint();
+      resetTimeout = null;
+    }, 100); // Small delay to ensure smooth transition
   }
 
   // Apply smoothing even when no motion is detected for smoother transitions
