@@ -26,13 +26,23 @@ export default function VideoPlayer({ src }: VideoPlayerProps) {
         }
       };
 
+      // Set initial playback position to middle of video when metadata is loaded
+      const handleLoadedMetadata = () => {
+        if (videoRef.current) {
+          const midPoint = videoRef.current.duration / 2;
+          videoRef.current.currentTime = midPoint;
+        }
+      };
+
       videoRef.current.addEventListener('error', handleError);
       videoRef.current.addEventListener('ended', handleEnded);
+      videoRef.current.addEventListener('loadedmetadata', handleLoadedMetadata);
 
       return () => {
         if (videoRef.current) {
           videoRef.current.removeEventListener('error', handleError);
           videoRef.current.removeEventListener('ended', handleEnded);
+          videoRef.current.removeEventListener('loadedmetadata', handleLoadedMetadata);
         }
       };
     }
