@@ -23,7 +23,20 @@ export default function CameraFeed({ onError, isEnabled, sensitivity }: CameraFe
           video: { 
             width: 640,
             height: 480,
-            facingMode: "user"
+            facingMode: "user",
+            // Add advanced constraints to minimize camera usage
+            advanced: [
+              {
+                brightness: 0,
+                contrast: 0,
+                saturation: 0,
+                sharpness: 0,
+                focusDistance: 0,
+                exposureMode: "manual",
+                exposureTime: 0,
+                frameRate: 15
+              }
+            ]
           }
         });
 
