@@ -28,15 +28,12 @@ export default function Home() {
         </h1>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Always render CameraFeed but control visibility */}
-          <div className={showCamera ? "block" : "hidden"}>
-            <Card>
-              <CardContent className="p-6">
-                <h2 className="text-2xl font-semibold mb-4">Camera Feed</h2>
-                <CameraFeed onError={handleError} isEnabled={isEnabled} sensitivity={sensitivity} />
-              </CardContent>
-            </Card>
-          </div>
+          <Card className={showCamera ? "block" : "hidden"}>
+            <CardContent className="p-6">
+              <h2 className="text-2xl font-semibold mb-4">Camera Feed</h2>
+              <CameraFeed onError={handleError} isEnabled={isEnabled} sensitivity={sensitivity} />
+            </CardContent>
+          </Card>
 
           <Card>
             <CardContent className="p-6">

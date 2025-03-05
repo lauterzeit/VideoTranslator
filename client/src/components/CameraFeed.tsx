@@ -23,20 +23,7 @@ export default function CameraFeed({ onError, isEnabled, sensitivity }: CameraFe
           video: { 
             width: 640,
             height: 480,
-            facingMode: "user",
-            // Add advanced constraints to minimize camera usage
-            advanced: [
-              {
-                brightness: 0,
-                contrast: 0,
-                saturation: 0,
-                sharpness: 0,
-                focusDistance: 0,
-                exposureMode: "manual",
-                exposureTime: 0,
-                frameRate: 15
-              }
-            ]
+            facingMode: "user"
           }
         });
 
@@ -79,23 +66,11 @@ export default function CameraFeed({ onError, isEnabled, sensitivity }: CameraFe
         autoPlay
         playsInline
         muted
-        className="absolute top-0 left-0 opacity-0"
-        style={{ 
-          visibility: 'hidden',
-          position: 'absolute',
-          left: '-9999px',
-          width: '640px',
-          height: '480px'
-        }}
+        className="w-full rounded-lg"
       />
       <canvas
         ref={canvasRef}
-        className="absolute top-0 left-0 opacity-0"
-        style={{ 
-          visibility: 'hidden',
-          position: 'absolute',
-          left: '-9999px'
-        }}
+        className="absolute top-0 left-0 w-full h-full opacity-0"
         width={640}
         height={480}
       />
