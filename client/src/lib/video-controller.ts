@@ -12,7 +12,7 @@ export function setVideoElement(element: HTMLVideoElement) {
 export function controlVideo(motion: { dx: number; dy: number }) {
   if (!videoElement) return;
 
-  const MOTION_THRESHOLD = 0.06; // default 0.1
+  const MOTION_THRESHOLD = 0.005; // default 0.1
   const SEEK_FACTOR = 2.0; // previous = 5 Seconds to seek per motion unit - MTL note
                           // flip left for right motion
   const VOLUME_FACTOR = 0.8; // Increased for more noticeable volume changes

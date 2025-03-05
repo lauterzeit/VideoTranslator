@@ -26,7 +26,7 @@ export default function CameraFeed({ onError, isEnabled, sensitivity }: CameraFe
             facingMode: "user"
           }
         });
-        
+
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
         }
@@ -66,11 +66,23 @@ export default function CameraFeed({ onError, isEnabled, sensitivity }: CameraFe
         autoPlay
         playsInline
         muted
-        className="w-full rounded-lg"
+        className="absolute top-0 left-0 opacity-0"
+        style={{ 
+          visibility: 'hidden',
+          position: 'absolute',
+          left: '-9999px',
+          width: '640px',
+          height: '480px'
+        }}
       />
       <canvas
         ref={canvasRef}
-        className="absolute top-0 left-0 w-full h-full opacity-0"
+        className="absolute top-0 left-0 opacity-0"
+        style={{ 
+          visibility: 'hidden',
+          position: 'absolute',
+          left: '-9999px'
+        }}
         width={640}
         height={480}
       />

@@ -42,7 +42,7 @@ export default function Home() {
             <CardContent className="p-6">
               <h2 className="text-2xl font-semibold mb-4">Video Player</h2>
               <VideoPlayer 
-                src="https://github.com/lauterzeit/media/raw/refs/heads/main/robot_girl_480x720_v2.mp4"
+                src="https://github.com/lauterzeit/media/raw/refs/heads/main/robot_girl_540x720_H264_v3.mp4"
               />
             </CardContent>
           </Card>

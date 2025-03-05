@@ -5,9 +5,9 @@ let resetTimeout: NodeJS.Timeout | null = null;
 class MotionSmoother {
   private smoothedX: number = 0;
   private smoothedY: number = 0;
-  private readonly smoothingFactor: number = 0.075; // Further reduced for smoother transitions, default 0.1
-  private readonly velocityDamping: number = 0.9; // Damping factor for motion, default 0.85
-  private readonly velocityThreshold: number = 0.05; // Minimum velocity threshold, default 0.05
+  private readonly smoothingFactor: number = 0.7; // Further reduced for smoother transitions, default 0.1
+  private readonly velocityDamping: number = 0.5; // Damping factor for motion, default 0.85
+  private readonly velocityThreshold: number = 0.035; // Minimum velocity threshold, default 0.05
   private prevDx: number = 0;
   private prevDy: number = 0;
   private velocityX: number = 0;
@@ -90,11 +90,11 @@ export function detectMotion(
   let motionY = 0;
   let motionPoints = 0;
 
-  // Adjust sensitivity threshold (lower value = more sensitive)
-  const threshold = (100 - sensitivity) * 0.5;
+  // Adjust sensitivity threshold (lower value = more sensitive) 0.5 was default
+  const threshold = (100 - sensitivity) * 0.4;
 
   // Sample fewer pixels for better performance and reduced noise
-  const sampleStep = 4; // Increased step size for sampling, default 8
+  const sampleStep = 8; // Increased step size for sampling, default 8
 
   // Compare pixels between frames
   for (let y = 0; y < canvas.height; y += sampleStep) {
@@ -139,8 +139,8 @@ export function detectMotion(
     return motionSmoother.smooth(rawMotion.dx, rawMotion.dy);
   }
 
-  // Check for inactivity (7 seconds)
-  if (!resetTimeout && Date.now() - lastMotionTime > 7000) {
+  // Check for inactivity (4 seconds)
+  if (!resetTimeout && Date.now() - lastMotionTime > 4000) {
     resetTimeout = setTimeout(() => {
       resetToMidpoint();
       resetTimeout = null;
